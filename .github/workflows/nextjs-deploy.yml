@@ -1,17 +1,33 @@
 name: GitHub Actions Demo
+env:
+  PROJECT_ID: nextjs-338316
+  REGION: us-east1
+  SERVICE: nextjs
 on: [push]
 jobs:
   job_id:
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
     - id: 'auth'
       uses: 'google-github-actions/auth@v0'
       with:
         credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
-    - name: 'Deploy to Cloud Run'
-      uses: 'google-github-actions/deploy-cloudrun@v0'
+    - name: Authorize Docker push
+      run: gcloud auth configure-docker
+    
+    - name: Build and Push Container
+      run: |-
+        docker build -t gcr.io/nextjs-338316/nextjs next-client/
+        docker push gcr.io/nextjs-338316/nextjs
+    
+    - name: Deploy to Cloud Run
+      id: deploy
+      uses: google-github-actions/deploy-cloudrun@v0
       with:
-        region: us-east1
-        image: 'gcr.io/nextjs-338316/nextjs'
-        service: 'nextjs'
+        service: ${{ env.SERVICE }}
+        image: gcr.io/nextjs-338316/nextjs
+        region: ${{ env.REGION }}
