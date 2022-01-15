@@ -24,7 +24,7 @@ const images = [
   { position: [2, 0, 2.75], rotation: [0, -Math.PI / 2.5, 0], url: pexel(1738986) }
 ]
 
-export default function Index() {
+export default function Gallery() {
   const { data, error } = useSWR('/api/people', fetcher)
 
   if (error) return <div>Failed to load</div>
